@@ -17,4 +17,6 @@ public interface TransferRepository {
     void addBalance(CardBalance cardBalance, BigDecimal amount);
 
     void subtractBalance(CardBalance cardBalance, BigDecimal amount);
+
+    void addCardBalance(CardBalance cardBalance);
 }

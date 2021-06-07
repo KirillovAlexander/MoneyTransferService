@@ -68,4 +68,9 @@ public class InMemoryTransferRepository implements TransferRepository {
     public void subtractBalance(CardBalance cardBalance, BigDecimal amount) {
         cardBalance.setBalance(cardBalance.getBalance().subtract(amount).setScale(SCALE, ROUNDING_MODE));
     }
+
+    @Override
+    public void addCardBalance(CardBalance cardBalance) {
+        cards.put(cardBalance.getCardNumber(), cardBalance);
+    }
 }
