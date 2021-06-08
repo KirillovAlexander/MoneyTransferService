@@ -32,18 +32,20 @@ import static org.hamcrest.Matchers.is;
 class TransferServiceTest {
 
     private static TransferService service;
-    private static Operation operation;
-    private static Card card;
+    private static final Operation operation;
+    private static final Card card;
+    private static final String SOME_INCORRECT_ID = "92297218-c7aa-11eb-b8bc-0242ac130003";
 
-    @BeforeAll
-    public static void init() {
-
+    static {
         card = new Card("testNotNull", LocalDate.parse("12/12", DateTimeFormat.forPattern("MM/yy")), "111");
         operation = new Operation(card, card, BigDecimal.valueOf(10));
         operation.setVerificationCode("0000");
+    }
 
+    @BeforeAll
+    public static void init() {
         CardBalance cardBalance = new CardBalance(card, new BigDecimal(100));
-        Optional<CardBalance> optionalCardBalance = Optional.ofNullable(cardBalance);
+        Optional<CardBalance> optionalCardBalance = Optional.of(cardBalance);
 
         TransferRepository repository = Mockito.mock(TransferRepository.class);
         Mockito.when(repository.getCardBalanceByNumber("testNotNull"))
@@ -55,16 +57,20 @@ class TransferServiceTest {
         Mockito.when(repository.getOperation(operation.getOperationId()))
                 .thenReturn(Optional.of(operation));
 
-        Mockito.when(repository.getOperation(UUID.fromString("92297218-c7aa-11eb-b8bc-0242ac130003")))
+        Mockito.when(repository.getOperation(UUID.fromString(SOME_INCORRECT_ID)))
                 .thenReturn(Optional.ofNullable(null));
-
-        VerificationService verificationService = Mockito.mock(VerificationService.class);
 
         CommissionService commissionService = Mockito.mock(CommissionService.class);
         Mockito.when(commissionService.getPct())
                 .thenReturn(BigDecimal.valueOf(0.01));
 
+        VerificationService verificationService = Mockito.mock(VerificationService.class);
+
         service = new TransferService(repository, verificationService, commissionService);
+        setScaleAndRoundingMode(service);
+    }
+
+    private static void setScaleAndRoundingMode(TransferService service) {
         try {
             Field roundingMode = service.getClass().getDeclaredField("ROUNDING_MODE");
             roundingMode.setAccessible(true);
@@ -74,7 +80,6 @@ class TransferServiceTest {
             scale.setInt(service, 1);
         } catch (NoSuchFieldException | IllegalAccessException e) {
             e.printStackTrace();
-            return;
         }
     }
 
@@ -125,7 +130,7 @@ class TransferServiceTest {
 
     @Test
     void confirmOperationIncorrectId() {
-        Throwable thrown = assertThrows(ErrorTransfer.class, () -> service.confirmOperation("92297218-c7aa-11eb-b8bc-0242ac130003", "0000"));
+        Throwable thrown = assertThrows(ErrorTransfer.class, () -> service.confirmOperation(SOME_INCORRECT_ID, "0000"));
         assertNotNull(thrown.getMessage());
     }
 

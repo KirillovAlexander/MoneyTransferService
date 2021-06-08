@@ -34,4 +34,9 @@ public class OperationDTO {
     public long getAmountValue() {
         return amount.getValue();
     }
+
+    public void setAmount(AmountDTO amount) {
+        this.amount = amount;
+    }
+
 }
