@@ -11,7 +11,7 @@ import ru.netology.service.transfer.TransferService;
 
 import java.util.UUID;
 
-@CrossOrigin(origins = "https://serp-ya.github.io", maxAge = 3600)
+@CrossOrigin(maxAge = 3600)
 @RestController("/")
 public class TransferController {
 
