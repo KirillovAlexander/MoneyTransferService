@@ -5,6 +5,8 @@ import org.joda.time.format.DateTimeFormat;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.springframework.test.context.event.annotation.AfterTestMethod;
+import org.springframework.test.context.event.annotation.BeforeTestMethod;
 import ru.netology.dto.AmountDTO;
 import ru.netology.dto.OperationDTO;
 import ru.netology.entity.card.Card;
@@ -40,6 +42,7 @@ class TransferServiceTest {
         card = new Card("testNotNull", LocalDate.parse("12/12", DateTimeFormat.forPattern("MM/yy")), "111");
         operation = new Operation(card, card, BigDecimal.valueOf(10));
         operation.setVerificationCode("0000");
+        operation.setCommission(BigDecimal.valueOf(0.1));
     }
 
     @BeforeAll
@@ -129,14 +132,25 @@ class TransferServiceTest {
     }
 
     @Test
+    @BeforeTestMethod("confirmOperation")
     void confirmOperationIncorrectId() {
         Throwable thrown = assertThrows(ErrorTransfer.class, () -> service.confirmOperation(SOME_INCORRECT_ID, "0000"));
         assertNotNull(thrown.getMessage());
     }
 
     @Test
+    @BeforeTestMethod("confirmOperation")
     void confirmOperationIncorrectCode() {
         Throwable thrown = assertThrows(ErrorTransfer.class, () -> service.confirmOperation(operation.getOperationId().toString(), "Incorrect"));
+        assertNotNull(thrown.getMessage());
+    }
+
+    @Test
+    @BeforeTestMethod("confirmOperation")
+    void confirmOperationIncorrectAmount() {
+        Operation operationWithIncorrectAmount = new Operation(card, card, BigDecimal.valueOf(110));
+        operationWithIncorrectAmount.setVerificationCode("0000");
+        Throwable thrown = assertThrows(ErrorTransfer.class, () -> service.confirmOperation(operationWithIncorrectAmount.getOperationId().toString(), "0000"));
         assertNotNull(thrown.getMessage());
     }
 
@@ -146,10 +160,10 @@ class TransferServiceTest {
     }
 
     @Test
-    void confirmOperationIncorrectAmount() {
-        Operation operationWithIncorrectAmount = new Operation(card, card, BigDecimal.valueOf(110));
-        operationWithIncorrectAmount.setVerificationCode("0000");
-        Throwable thrown = assertThrows(ErrorTransfer.class, () -> service.confirmOperation(operationWithIncorrectAmount.getOperationId().toString(), "0000"));
+    @AfterTestMethod("confirmOperation")
+    void givenValidOperation_whenConfirmSecondTime_thenAssertException() {
+        Throwable thrown = assertThrows(ErrorTransfer.class, () -> service.confirmOperation(operation.getOperationId().toString(), "0000"));
         assertNotNull(thrown.getMessage());
     }
+
 }

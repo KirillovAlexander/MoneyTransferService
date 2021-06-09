@@ -18,6 +18,7 @@ public class Operation {
     private final Card cardTo;
     private final LocalDate date;
     private final BigDecimal amount;
+    private BigDecimal commission;
     private String verificationCode;
     private boolean isCompleted;
 
@@ -68,5 +69,25 @@ public class Operation {
 
     public void setCompleted(boolean completed) {
         this.isCompleted = completed;
+    }
+
+    public boolean isCompleted() {
+        return isCompleted;
+    }
+
+    public BigDecimal getCommission() {
+        return commission;
+    }
+
+    public void setCommission(BigDecimal commission) {
+        this.commission = commission;
+    }
+
+    public BigDecimal getAmountWithCommission() {
+        return amount.add(commission);
+    }
+
+    public String info() {
+        return cardFrom.getNumber() + " -> " + cardTo.getNumber() + ", amount: " + amount + " with commission: " + commission;
     }
 }

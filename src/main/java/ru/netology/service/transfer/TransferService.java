@@ -1,5 +1,6 @@
 package ru.netology.service.transfer;
 
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ru.netology.dto.OperationDTO;
@@ -22,6 +23,8 @@ public class TransferService {
     private final TransferRepository repository;
     private final VerificationService verificationService;
     private final CommissionService commissionService;
+
+    private final static Logger logger = Logger.getLogger(TransferService.class);
 
     @Value("${rounding.scale}")
     private int SCALE;
@@ -50,13 +53,14 @@ public class TransferService {
         //Get cards data from operation
         Card cardFrom = operation.getCardFrom();
         Card cardTo = operation.getCardTo();
-        BigDecimal transferAmount = operation.getAmount();
+        //set commission value
+        setCommission(operation);
         //Check if cards are equal
         if (sameCards(cardFrom, cardTo)) throw new ErrorTransfer("Нельзя переводить деньги между одной картой.");
         //Get card balance from repo
         Optional<CardBalance> optionalCardBalanceFrom = repository.getCardBalanceByNumber(cardFrom.getNumber());
         //Check `card from` and `card to`
-        return cardBalanceFromValid(optionalCardBalanceFrom, cardFrom, transferAmount) && cardBalanceToValid(cardTo);
+        return cardBalanceFromValid(optionalCardBalanceFrom, cardFrom, operation.getAmountWithCommission()) && cardBalanceToValid(cardTo);
     }
 
     private boolean cardBalanceFromValid(Optional<CardBalance> optCardBalance, Card cardFrom, BigDecimal transferAmount) {
@@ -65,7 +69,7 @@ public class TransferService {
         if (!cardFrom.getValidTill().equals(validCard.getValidTill()) || !cardFrom.getCVV().equals(validCard.getCVV()))
             throw new ErrorInputData();
         BigDecimal balance = cardBalanceFrom.getBalance();
-        if (balance.compareTo(getAmountWithCommission(transferAmount)) < 0)
+        if (balance.compareTo(transferAmount) < 0)
             throw new ErrorTransfer("Недостаточно средств на счёте.");
         return true;
     }
@@ -80,6 +84,8 @@ public class TransferService {
         //Get operation from repo
         Optional<Operation> optionalOperation = repository.getOperation(UUID.fromString(operationId));
         Operation operation = optionalOperation.orElseThrow(() -> new ErrorTransfer("Неверный код операции."));
+        //Check operation status. If operation completed - throw an exception
+        if (operation.isCompleted()) throw new ErrorTransfer("Операция уже выполнена.");
         //Get card balance from repo
         Optional<CardBalance> optionalCardBalance = repository.getCardBalanceByNumber(operation.getCardFrom().getNumber());
         CardBalance cardBalanceFrom = optionalCardBalance.orElseThrow(ErrorInputData::new);
@@ -87,23 +93,22 @@ public class TransferService {
         //Check `card to`
         Optional<CardBalance> optionalCardBalanceTo = repository.getCardBalanceByNumber(operation.getCardTo().getNumber());
         CardBalance cardBalanceTo = optionalCardBalanceTo.orElseThrow(ErrorInputData::new);
-        //Check `card from` balance
-        if (balanceFrom.compareTo(getAmountWithCommission(operation.getAmount())) < 0)
+        //Set commission and check `card from` balance
+        if (balanceFrom.compareTo(operation.getAmountWithCommission()) < 0)
             throw new ErrorTransfer("Недостаточно средств на счёте.");
         //Check verification code
         String validCode = operation.getVerificationCode();
         if (!code.equals(validCode)) throw new ErrorTransfer("Подтверждающий код неверный.");
         //Do operation
-        repository.subtractBalance(cardBalanceFrom, getAmountWithCommission(operation.getAmount()));
+        repository.subtractBalance(cardBalanceFrom, operation.getAmountWithCommission());
         repository.addBalance(cardBalanceTo, operation.getAmount());
         operation.setCompleted(true);
-
+        logger.info(operation.info());
         return operation.getOperationId();
     }
 
-
-    private BigDecimal getAmountWithCommission(BigDecimal amount) {
-        return amount.add(amount.multiply(commissionService.getPct())).setScale(SCALE, ROUNDING_MODE);
+    private void setCommission(Operation operation) {
+        operation.setCommission(operation.getAmount().multiply(commissionService.getPct()).setScale(SCALE, ROUNDING_MODE));
     }
 
     private boolean sameCards(Card cardFrom, Card cardTo) {
