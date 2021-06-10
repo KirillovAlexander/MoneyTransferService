@@ -37,6 +37,15 @@ REST-сервис, предоставляющий интерфейс для пе
 `rounding.mode = HALF_UP` - режим округления
 
 По умолчанию создаются 3 карты:
-карта1
-карта2
-карта3
+
+![Card 1](./assets/card1.png)
+
+![Card 2](./assets/card2.png)
+
+![Card 3](./assets/card3.png)
+
+## Фронт приложение
+
+UI для перевода денег с карты на карту: https://github.com/serp-ya/card-transfer
+
+Развернутое демо: https://serp-ya.github.io/card-transfer/
