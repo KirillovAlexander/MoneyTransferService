@@ -1,0 +1,7 @@
+version: '3.8'
+
+services:
+  money_transfer_serive:
+    image: money_transfer_service:latest
+    ports:
+      - 5500:5500
