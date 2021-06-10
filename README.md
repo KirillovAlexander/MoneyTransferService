@@ -20,7 +20,7 @@ REST-сервис, предоставляющий интерфейс для пе
 
 Логирование с использованием log4j.
 
-Сервис реализовывает все методы перевода описанные в протоколе: https://github.com/netology-code/jd-homeworks/blob/master/diploma/MoneyTransferServiceSpecification.yaml
+Сервис реализует все методы перевода описанные в протоколе: https://github.com/netology-code/jd-homeworks/blob/master/diploma/MoneyTransferServiceSpecification.yaml
 
 ## Настройка и тестовые данные
 
