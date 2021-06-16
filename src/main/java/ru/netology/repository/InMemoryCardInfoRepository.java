@@ -18,7 +18,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Repository
-public class InMemoryTransferRepository implements TransferRepository {
+public class InMemoryCardInfoRepository implements CardInfoRepository {
     private final Map<String, CardBalance> cards = new ConcurrentHashMap<>();
     private final Map<UUID, Operation> operationMap = new ConcurrentHashMap<>();
 

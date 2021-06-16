@@ -14,7 +14,7 @@ import ru.netology.entity.card.CardBalance;
 import ru.netology.entity.operation.Operation;
 import ru.netology.exceptions.ErrorInputData;
 import ru.netology.exceptions.ErrorTransfer;
-import ru.netology.repository.TransferRepository;
+import ru.netology.repository.CardInfoRepository;
 import ru.netology.service.commission.CommissionService;
 import ru.netology.service.verification.VerificationService;
 
@@ -31,9 +31,9 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 
-class TransferServiceTest {
+class TransferServiceImplTest {
 
-    private static TransferService service;
+    private static TransferServiceImpl service;
     private static final Operation operation;
     private static final Card card;
     private static final String SOME_INCORRECT_ID = "92297218-c7aa-11eb-b8bc-0242ac130003";
@@ -50,7 +50,7 @@ class TransferServiceTest {
         CardBalance cardBalance = new CardBalance(card, new BigDecimal(100));
         Optional<CardBalance> optionalCardBalance = Optional.of(cardBalance);
 
-        TransferRepository repository = Mockito.mock(TransferRepository.class);
+        CardInfoRepository repository = Mockito.mock(CardInfoRepository.class);
         Mockito.when(repository.getCardBalanceByNumber("testNotNull"))
                 .thenReturn(optionalCardBalance);
 
@@ -69,11 +69,11 @@ class TransferServiceTest {
 
         VerificationService verificationService = Mockito.mock(VerificationService.class);
 
-        service = new TransferService(repository, verificationService, commissionService);
+        service = new TransferServiceImpl(repository, verificationService, commissionService);
         setScaleAndRoundingMode(service);
     }
 
-    private static void setScaleAndRoundingMode(TransferService service) {
+    private static void setScaleAndRoundingMode(TransferServiceImpl service) {
         try {
             Field roundingMode = service.getClass().getDeclaredField("ROUNDING_MODE");
             roundingMode.setAccessible(true);
@@ -90,8 +90,8 @@ class TransferServiceTest {
     void transferSameCards() {
         OperationDTO operationDTO = new OperationDTO("same", "01/01", "111", "same",
                 new AmountDTO("RUR", 10));
-
-        Throwable thrown = assertThrows(ErrorTransfer.class, () -> service.transfer(operationDTO));
+        Operation operation = Operation.getOperationFromOperationDTO(operationDTO);
+        Throwable thrown = assertThrows(ErrorTransfer.class, () -> service.transfer(operation));
         assertNotNull(thrown.getMessage());
     }
 
@@ -99,8 +99,8 @@ class TransferServiceTest {
     void transferIncorrectCardNumber() {
         OperationDTO operationDTO = new OperationDTO("testNull", "01/01", "111", "AnotherCard",
                 new AmountDTO("RUR", 10));
-
-        Throwable thrown = assertThrows(ErrorInputData.class, () -> service.transfer(operationDTO));
+        Operation operation = Operation.getOperationFromOperationDTO(operationDTO);
+        Throwable thrown = assertThrows(ErrorInputData.class, () -> service.transfer(operation));
         assertNotNull(thrown.getMessage());
     }
 
@@ -108,8 +108,8 @@ class TransferServiceTest {
     void transferIncorrectCVV() {
         OperationDTO operationDTO = new OperationDTO("testNotNull", "01/01", "value", "AnotherCard",
                 new AmountDTO("RUR", 10));
-
-        Throwable thrown = assertThrows(ErrorInputData.class, () -> service.transfer(operationDTO));
+        Operation operation = Operation.getOperationFromOperationDTO(operationDTO);
+        Throwable thrown = assertThrows(ErrorInputData.class, () -> service.transfer(operation));
         assertNotNull(thrown.getMessage());
     }
 
@@ -117,8 +117,8 @@ class TransferServiceTest {
     void transferIncorrectDate() {
         OperationDTO operationDTO = new OperationDTO("testNotNull", "01/01", "111", "AnotherCard",
                 new AmountDTO("RUR", 10));
-
-        Throwable thrown = assertThrows(ErrorInputData.class, () -> service.transfer(operationDTO));
+        Operation operation = Operation.getOperationFromOperationDTO(operationDTO);
+        Throwable thrown = assertThrows(ErrorInputData.class, () -> service.transfer(operation));
         assertNotNull(thrown.getMessage());
     }
 
@@ -126,8 +126,8 @@ class TransferServiceTest {
     void transferIncorrectAmount() {
         OperationDTO operationDTO = new OperationDTO("testNotNull", "12/12", "111", "AnotherCard",
                 new AmountDTO("RUR", 110));
-
-        Throwable thrown = assertThrows(ErrorTransfer.class, () -> service.transfer(operationDTO));
+        Operation operation = Operation.getOperationFromOperationDTO(operationDTO);
+        Throwable thrown = assertThrows(ErrorTransfer.class, () -> service.transfer(operation));
         assertNotNull(thrown.getMessage());
     }
 

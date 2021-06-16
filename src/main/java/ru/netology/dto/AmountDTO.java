@@ -1,7 +1,17 @@
 package ru.netology.dto;
 
+import org.springframework.validation.annotation.Validated;
+
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
+
+@Validated
 public class AmountDTO {
+    @NotBlank
     private String currency;
+    @NotEmpty
+    @Min(1)
     private long value;
 
     public AmountDTO(String currency, long value) {

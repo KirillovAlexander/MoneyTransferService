@@ -5,9 +5,9 @@ import org.joda.time.*;
 import java.util.Objects;
 
 public class Card {
-    private String number;
-    private LocalDate validTill;
-    private String CVV;
+    private final String number;
+    private final LocalDate validTill;
+    private final String CVV;
 
     public Card(String number, LocalDate validTill, String CVV) {
         this.number = number;
@@ -17,6 +17,8 @@ public class Card {
 
     public Card(String number) {
         this.number = number;
+        this.validTill = null;
+        this.CVV = null;
     }
 
     public String getNumber() {

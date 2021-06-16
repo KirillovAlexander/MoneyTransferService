@@ -7,7 +7,7 @@ import java.math.BigDecimal;
 import java.util.Optional;
 import java.util.UUID;
 
-public interface TransferRepository {
+public interface CardInfoRepository {
     Optional<CardBalance> getCardBalanceByNumber(String number);
 
     void addOperation(Operation operation);

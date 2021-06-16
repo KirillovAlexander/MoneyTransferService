@@ -3,7 +3,7 @@ package ru.netology.entity.card;
 import java.math.BigDecimal;
 
 public class CardBalance {
-    private Card card;
+    private final Card card;
     private BigDecimal balance;
 
     public CardBalance(Card card, BigDecimal balance) {

@@ -1,9 +1,23 @@
 package ru.netology.dto;
 
+import org.springframework.validation.annotation.Validated;
+
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
+
+@Validated
 public class OperationDTO {
+    @NotBlank
+    @Size(min = 16, max = 16)
     private String cardFromNumber;
+    @NotBlank
+    @Size(min = 5, max = 5)
     private String cardFromValidTill;
+    @NotBlank
+    @Size(min = 3, max = 3)
     private String cardFromCVV;
+    @NotBlank
+    @Size(min = 16, max = 16)
     private String cardToNumber;
     private AmountDTO amount;
 

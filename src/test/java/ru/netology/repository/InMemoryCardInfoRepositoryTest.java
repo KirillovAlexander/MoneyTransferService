@@ -19,9 +19,9 @@ import java.math.RoundingMode;
 import java.util.Optional;
 import java.util.UUID;
 
-class InMemoryTransferRepositoryTest {
+class InMemoryCardInfoRepositoryTest {
 
-    private static TransferRepository repository = new InMemoryTransferRepository();
+    private static CardInfoRepository repository = new InMemoryCardInfoRepository();
 
     @BeforeAll
     public static void init() {

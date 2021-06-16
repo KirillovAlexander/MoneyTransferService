@@ -5,25 +5,28 @@ import org.springframework.web.bind.annotation.*;
 import ru.netology.dto.ConfirmOperationDTO;
 import ru.netology.dto.OperationDTO;
 import ru.netology.dto.ResponseTransferDTO;
+import ru.netology.entity.operation.Operation;
 import ru.netology.exceptions.ErrorInputData;
 import ru.netology.exceptions.ErrorTransfer;
-import ru.netology.service.transfer.TransferService;
+import ru.netology.service.transfer.TransferServiceImpl;
 
+import javax.validation.Valid;
 import java.util.UUID;
 
 @CrossOrigin(maxAge = 3600)
 @RestController("/")
 public class TransferController {
 
-    private final TransferService service;
+    private final TransferServiceImpl service;
 
-    public TransferController(TransferService service) {
+    public TransferController(TransferServiceImpl service) {
         this.service = service;
     }
 
     @PostMapping("transfer")
-    public ResponseTransferDTO transfer(@RequestBody OperationDTO operationDTO) {
-        UUID operationId = service.transfer(operationDTO);
+    public ResponseTransferDTO transfer(@RequestBody @Valid OperationDTO operationDTO) {
+        Operation operation = Operation.getOperationFromOperationDTO(operationDTO);
+        UUID operationId = service.transfer(operation);
         return new ResponseTransferDTO(operationId);
     }
 
